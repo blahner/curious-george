@@ -61,9 +61,6 @@ if __name__=='__main__':
             self.numMonkeys = 100000 #how many monkeys are in this experiment? Monkeys work in parallel but don't share results https://www.science.org/content/article/record-number-monkeys-being-used-us-research#:~:text=The%20total%20number%20of%20monkeys,see%20second%20graph%2C%20below)
             self.monkeyLifetime = 40 #time in years a monkey can be expected to live. 40 years in captivity: https://genomics.senescence.info/species/entry.php?species=Macaca_mulatta
             self.cpm = 200 #characters per minute the monkeys can type
-
-            #self.M = int(self.timeToType*self.cpm*365*24*60) #number of characters each monkey will type
-            #self.gotoK = 0.99 #if not None, run code until we have a K% chance of numMonkeys typing sequence of length N irrespective of lifetime
     args = arguments()
 
     N = 14 #there are 14 characters in "Curious George"
