@@ -57,7 +57,6 @@ if __name__=='__main__':
     class arguments():
         def __init__(self):
             self.saveroot = os.path.join("/home","blahner","projects","curious-george","output")
-            #self.N = 10 #how many characters is the sequence that you want the monkeys to randomly type?
             self.numMonkeys = 100000 #how many monkeys are in this experiment? Monkeys work in parallel but don't share results https://www.science.org/content/article/record-number-monkeys-being-used-us-research#:~:text=The%20total%20number%20of%20monkeys,see%20second%20graph%2C%20below)
             self.monkeyLifetime = 40 #time in years a monkey can be expected to live. 40 years in captivity: https://genomics.senescence.info/species/entry.php?species=Macaca_mulatta
             self.cpm = 200 #characters per minute the monkeys can type
@@ -65,9 +64,16 @@ if __name__=='__main__':
 
     N = 14 #there are 14 characters in "Curious George"
     M = int(args.monkeyLifetime*args.cpm*365*24*60) #number of characters each monkey will type in their lifetime
-    
-    ## Analysis 1: run code until we have a 99% chance that at least one monkey will randomly type a sequence of N in K
+
+    ## Analysis 1: compute probability of typing sequence of N in the monkeys' lifetime
     print("starting Analysis #1...")
+    print(f"{args.numMonkeys} monkeys are typing for {args.monkeyLifetime} years to type a specific sequence of {N} characters...")
+    oneMonkeyProb = prob_N_in_M(N, M)
+    print(f"Probability of success using just one monkey: {oneMonkeyProb}")
+    print(f"Probability of success for at least one of {args.numMonkeys} monkeys: {1-((1-oneMonkeyProb)**args.numMonkeys)}")    
+    
+    ## Analysis 2: run code until we have a 99% chance that at least one monkey will randomly type a sequence of N in K
+    print("starting Analysis #2...")
     K_percent = 0.99
     final_prob, M_tmp, x = until_K_percent_success(N, K_percent, args.numMonkeys)
     print(len(M_tmp))
@@ -81,7 +87,7 @@ if __name__=='__main__':
     plt.xlim([0, x[-1]])
     plt.hlines(0,0,x[-1],'k')
     #depending on your parameters, you might want these reference points
-    plt.vlines(25,0,1,'r') #50 is lifespan of monkey
+    plt.vlines(args.monkeyLifetime,0,1,'r') #40 is lifespan of monkey
     plt.vlines(6000,0,1,'b') #6000 is time since first human civilization
     plt.vlines(350000,0,1,'g') #350000 is time since first human
     plt.vlines(66000000,0,1,'m') #66000000 is time since dinosaurs were wiped out
@@ -93,15 +99,9 @@ if __name__=='__main__':
     plt.savefig(os.path.join(args.saveroot, f"N-{N}_K-{K_percent}_numMonkeys-{args.numMonkeys}_cpm-{args.cpm}_plot.svg"))
     plt.clf()
 
-    ## Analysis 2: compute probability of typing sequence of N in the monkeys' lifetime
-    print("starting Analysis #2...")
-    print(f"{args.numMonkeys} monkeys are typing for {args.monkeyLifetime} years to type a specific sequence of {N} characters...")
-    oneMonkeyProb = prob_N_in_M(N, args.M)
-    print(f"Probability of success using just one monkey: {oneMonkeyProb}")
-    print(f"Probability of success for at least one of {args.numMonkeys} monkeys: {1-((1-oneMonkeyProb)**args.numMonkeys)}")
-
     """
     ## Analysis 3: plot the time it takes to get to the 50% mark for increasing values of N
+    print("starting Analysis #3...")
     K_percent = 0.5
     N_max = 4
     N_ = []
