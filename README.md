@@ -1,5 +1,5 @@
 # curious-george
-This code was used in the writing of my Medium post, ["Curious George Discovers the Infinite Monkey Theorem"]([tmp](https://medium.com/@benlahner/curious-george-discovers-the-infinite-monkey-theorem-652d73667229)).
+This code was used in the writing of my Medium post, ["Curious George Discovers the Infinite Monkey Theorem"](https://medium.com/@benlahner/curious-george-discovers-the-infinite-monkey-theorem-652d73667229).
 
 This code explores the [Infinite Monkey Theorem](https://en.wikipedia.org/wiki/Infinite_monkey_theorem) by simulating monkey(s) randomly typing on a keyboard. At its core, the code calculates the probability of randomly achieving a sequence N successes in K attempts (see my [previous post](https://medium.com/@benlahner/what-is-the-probability-of-flipping-n-consecutive-heads-in-k-coin-flips-71fcae35c33a) on an explanation of this probability). 
 
