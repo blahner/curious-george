@@ -11,6 +11,9 @@ def prob_N_in_M(N: int, M: int):
     """
     return the probability of getting N consecutive successes in M attempts.
     Using queues, this function uses O(N) space (i.e., the variable N) and runs in O(M) time.
+    Visit
+    https://medium.com/@benlahner/what-is-the-probability-of-flipping-n-consecutive-heads-in-k-coin-flips-71fcae35c33a
+    for explanation of the probabilities.
     """
     start = time.time()
     p = 1/32 #1/32 #probability of success. Including 32 characters: 26 letters and special characters " .,?!'"
