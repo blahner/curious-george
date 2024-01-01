@@ -1,8 +1,11 @@
+#author: Ben Lahner
+
 import os
 import numpy as np
 import time
 import matplotlib.pyplot as plt
 from collections import deque
+from scipy.optimize import curve_fit
 
 def prob_N_in_M(N: int, M: int):
     """
@@ -53,25 +56,33 @@ def until_K_percent_success(N: int, K: float, numMonkeys: int):
     print(f"time to run code: {time.time() - start} seconds")
     return P[-1], M, x
 
+def objective(x, a, b, c):
+    #objective function to fit the curve. Just a general exponential
+    return a*b**(x-c)
+
 if __name__=='__main__':
     class arguments():
         def __init__(self):
-            self.saveroot = os.path.join("/home","blahner","projects","curious-george","output")
+            self.saveroot = os.path.join("your","path","to","project","output")
             self.numMonkeys = 100000 #how many monkeys are in this experiment? Monkeys work in parallel but don't share results https://www.science.org/content/article/record-number-monkeys-being-used-us-research#:~:text=The%20total%20number%20of%20monkeys,see%20second%20graph%2C%20below)
             self.monkeyLifetime = 40 #time in years a monkey can be expected to live. 40 years in captivity: https://genomics.senescence.info/species/entry.php?species=Macaca_mulatta
             self.cpm = 200 #characters per minute the monkeys can type
     args = arguments()
 
-    N = 14 #there are 14 characters in "Curious George"
-    M = int(args.monkeyLifetime*args.cpm*365*24*60) #number of characters each monkey will type in their lifetime
+    if not os.path.exists(args.saveroot):
+        os.makedirs(args.saveroot)
 
+    N = 11 #there are 14 characters in "Curious George"
+    M = int(args.monkeyLifetime*args.cpm*365*24*60) #number of characters each monkey will type in their lifetime
+    
     ## Analysis 1: compute probability of typing sequence of N in the monkeys' lifetime
     print("starting Analysis #1...")
     print(f"{args.numMonkeys} monkeys are typing for {args.monkeyLifetime} years to type a specific sequence of {N} characters...")
     oneMonkeyProb = prob_N_in_M(N, M)
     print(f"Probability of success using just one monkey: {oneMonkeyProb}")
     print(f"Probability of success for at least one of {args.numMonkeys} monkeys: {1-((1-oneMonkeyProb)**args.numMonkeys)}")    
-    
+
+    """
     ## Analysis 2: run code until we have a 99% chance that at least one monkey will randomly type a sequence of N in K
     print("starting Analysis #2...")
     K_percent = 0.99
@@ -98,25 +109,46 @@ if __name__=='__main__':
     plt.savefig(os.path.join(args.saveroot, f"N-{N}_K-{K_percent}_numMonkeys-{args.numMonkeys}_cpm-{args.cpm}_plot.png"))
     plt.savefig(os.path.join(args.saveroot, f"N-{N}_K-{K_percent}_numMonkeys-{args.numMonkeys}_cpm-{args.cpm}_plot.svg"))
     plt.clf()
-
+    """
     """
     ## Analysis 3: plot the time it takes to get to the 50% mark for increasing values of N
     print("starting Analysis #3...")
     K_percent = 0.5
-    N_max = 4
-    N_ = []
-    for N_tmp in range(N_max):
+    N_max = 9
+    N_ = [n for n in range(N_max+1)]
+    time_to_K = []
+    for N_tmp in N_:
+        print(f"N: {N_tmp}")
         final_prob, M_tmp, x = until_K_percent_success(N_tmp, K_percent, args.numMonkeys)
-        x = np.array(x)/(args.cpm*60*24*365) #convert x from character count to time (years)
-        N_.append(x[-1])
+        x_years = np.array(x)/(args.cpm*60*24*365) #convert x from character count to time (years)
+        time_to_K.append(x_years[-1])
 
     #plotting code ...
-    plt.plot(N_, '-*')
+    plt.plot(N_, time_to_K, '-*')
     plt.title(f"{K_percent*100:.0f}% chance at N with {args.numMonkeys} monkeys")
     plt.xlim([0, N_max+1])
     plt.xlabel("N (sequence length)")
     plt.ylabel(f"Time to {K_percent*100:.0f}% (years)")
     plt.savefig(os.path.join(args.saveroot, f"time_to_K-{K_percent}_numMonkeys-{args.numMonkeys}_cpm-{args.cpm}_plot.png"))
     plt.savefig(os.path.join(args.saveroot, f"time_to_K-{K_percent}_numMonkeys-{args.numMonkeys}_cpm-{args.cpm}_plot.svg"))
+    plt.clf()
+
+    # fit curve to extrapolate data
+    fit_params, _ = curve_fit(objective, np.array(N_), np.array(time_to_K))
+
+    x_new = [n for n in range(52)]
+    a, b, c = fit_params
+    print(f"fitted params: a= {a}, b= {b}, c= {c}")
+    # use optimal parameters to calculate new values
+    y_new = objective(x_new, a, b, c)
+
+    #plotting code ...
+    plt.plot(x_new, y_new, 'r-o')
+    plt.title(f"Extrapolated {K_percent*100:.0f}% chance at N with {args.numMonkeys} monkeys")
+    plt.xlim([0, x_new[-1]])
+    plt.xlabel("N (sequence length)")
+    plt.ylabel(f"Time to {K_percent*100:.0f}% (years)")
+    plt.savefig(os.path.join(args.saveroot, f"curvefit_time_to_K-{K_percent}_numMonkeys-{args.numMonkeys}_cpm-{args.cpm}_plot.png"))
+    plt.savefig(os.path.join(args.saveroot, f"curvefit_time_to_K-{K_percent}_numMonkeys-{args.numMonkeys}_cpm-{args.cpm}_plot.svg"))
     plt.clf()
     """
